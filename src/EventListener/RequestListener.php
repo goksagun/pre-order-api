@@ -24,7 +24,7 @@ class RequestListener
         }
 
         if ($request->headers->get('content-type') !== 'application/json') {
-            throw new UnsupportedMediaTypeHttpException();
+            throw new UnsupportedMediaTypeHttpException('Unsupported Media Type');
         }
 
         if (count($request->request->all())) {
