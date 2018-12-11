@@ -3,10 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Order;
+use App\Events;
 use App\Repository\OrderRepository;
 use App\Validation\OrderPostValidation;
 use App\Validation\OrderPutValidation;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -93,8 +96,11 @@ class OrderController extends AbstractController
     /**
      * @Route("/orders/{id<\d+>}", methods={"PATCH"})
      */
-    public function patchOrderStatus(Request $request, OrderRepository $repository)
-    {
+    public function patchOrderStatus(
+        Request $request,
+        OrderRepository $repository,
+        EventDispatcherInterface $dispatcher
+    ) {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         $order = $repository->updateOrderStatus(
@@ -102,12 +108,16 @@ class OrderController extends AbstractController
             $request->get('status')
         );
 
+        $event = new GenericEvent($order);
+
+        $dispatcher->dispatch(Events::ORDER_CHANGED, $event);
+
         return $this->json(
             [
                 [
                     'id' => $order->getId(),
                     'status' => $order->getStatus(),
-                ]
+                ],
             ]
         );
     }
