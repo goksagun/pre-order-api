@@ -11,8 +11,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * To schedule this command add fallowing cron to your crontab
- * crontab: * * * * * php /path-to-your-project/bin/console app:order-auto-reject >> /dev/null 2>&1
+ * Create a Cronjob
+ *
+ * Now that we have our command configured correctly and we've verified that it's working, we'll finish by scheduling our
+ * command to run at a specific time daily.
+ * - To open up the crontab, run the following in the terminal:
+ *   crontab -e
+ * - Then we'll set the interval (once a day at midnight) for our cronjob, as well as the task to be executed.
+ *   * * * * * php /path-to-your-project/bin/console app:order-auto-reject >> /dev/null 2>&1
  */
 class OrderAutoRejectCommand extends Command
 {
