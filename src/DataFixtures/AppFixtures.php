@@ -4,6 +4,8 @@ namespace App\DataFixtures;
 
 use App\Entity\Cart;
 use App\Entity\CartProduct;
+use App\Entity\Order;
+use App\Entity\OrderProduct;
 use App\Entity\Product;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -17,12 +19,15 @@ class AppFixtures extends Fixture
     public const CART_NUM_ITEMS = 9;
     public const CART_PRODUCT_REFERENCE_PREFIX = 'cart_product';
     public const CART_PRODUCT_NUM_ITEMS = 33;
+    public const ORDER_REFERENCE_PREFIX = 'order';
+    public const ORDER_NUM_ITEMS = 9;
 
     public function load(ObjectManager $manager)
     {
         $this->loadProducts($manager);
         $this->loadCarts($manager);
         $this->loadCartProducts($manager);
+        $this->loadOrders($manager);
     }
 
     private function loadProducts(ObjectManager $manager)
@@ -93,6 +98,57 @@ class AppFixtures extends Fixture
             $manager->persist($cartProduct);
 
             $this->addReference(sprintf('%s_%d', self::CART_PRODUCT_REFERENCE_PREFIX, $i), $cartProduct);
+
+            if ($i % 20 == 0) {
+                $manager->flush();
+                $manager->clear();
+            }
+        }
+
+        $manager->flush();
+    }
+
+    private function loadOrders(ObjectManager $manager)
+    {
+        $faker = Factory::create();
+
+        $cartIndexes = [];
+        for ($i = 1; $i <= self::ORDER_NUM_ITEMS; ++$i) {
+            $order = new Order();
+
+            randomIndex:
+            $cartIndex = $faker->numberBetween(1, self::CART_NUM_ITEMS);
+            if (in_array($cartIndex, $cartIndexes)) {
+                goto randomIndex;
+            }
+            $cartIndexes[] = $cartIndex;
+
+            /** @var Cart $cart */
+            $cart = $this->getReference(
+                sprintf('%s_%d', self::CART_REFERENCE_PREFIX, $cartIndex)
+            );
+
+            $order->setCart($cart);
+            $order->setType(Order::TYPE_ORDER);
+            $order->setEmail($faker->email);
+            $order->setFirstName($faker->firstName);
+            $order->setLastName($faker->lastName);
+            $order->setPhone($faker->phoneNumber);
+
+            foreach ($cart->getItems() as $cartProduct) {
+                $orderProduct = new OrderProduct();
+                $orderProduct->setSku($cartProduct->getProduct()->getSku());
+                $orderProduct->setName($cartProduct->getProduct()->getName());
+                $orderProduct->setStock($cartProduct->getProduct()->getStock());
+                $orderProduct->setPrice($cartProduct->getProduct()->getPrice());
+                $orderProduct->setQuantity($cartProduct->getQuantity());
+
+                $order->addItem($orderProduct);
+            }
+
+            $manager->persist($order);
+
+            $this->addReference(sprintf('%s_%d', self::ORDER_REFERENCE_PREFIX, $i), $order);
 
             if ($i % 20 == 0) {
                 $manager->flush();
