@@ -95,4 +95,17 @@ class OrderRepository extends ServiceEntityRepository
 
         return $order;
     }
+
+    public function findOrdersDue()
+    {
+        return $this->createQueryBuilder('o')
+            ->select('o.id')
+            ->where('o.createdAt <= :dueDate')
+            ->setParameter('dueDate', new \DateTime('-1 day'))
+            ->andWhere('o.status = :statusIncomplete')
+            ->setParameter('statusIncomplete', Order::STATUS_INCOMPLETE)
+            ->getQuery()
+            ->getResult()
+            ;
+    }
 }
