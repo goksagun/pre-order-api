@@ -30,7 +30,7 @@ class OrderPutValidation extends AbstractValidation
                 'phone' => [
                     new Assert\NotBlank(),
                     // Use simple regex pattern for validating mobile phone number starting by 05 or 5 (https://regexr.com/44ob5)
-                    new Assert\Regex(['pattern' => '/^(5|05).[0-9]{7,8}$/', 'message' => 'This value should be a mobile phone.']),
+                    new Assert\Regex(['pattern' => Order::PHONE_REGEX_PATTERN, 'message' => Order::PHONE_REGEX_MESSAGE]),
                 ],
                 'status' => [
                     new Assert\Choice(Order::STATUSES),

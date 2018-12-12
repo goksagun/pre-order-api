@@ -29,7 +29,8 @@ class OrderPostValidation extends AbstractValidation
                 ],
                 'phone' => [
                     new Assert\NotBlank(),
-                    new Assert\Regex(['pattern' => '/^(5|05).*$/', 'message' => 'This value should be a mobile phone.']),
+                    // Use simple regex pattern for validating mobile phone number starting by 05 or 5 (https://regexr.com/44ob5)
+                    new Assert\Regex(['pattern' => Order::PHONE_REGEX_PATTERN, 'message' => Order::PHONE_REGEX_MESSAGE]),
                 ],
             ]
         );

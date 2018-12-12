@@ -23,6 +23,9 @@ class Order implements TimestampsInterface
     public const STATUS_REJECTED = 'rejected';
     public const STATUS_AUTO_REJECTED = 'auto_rejected';
 
+    public const PHONE_REGEX_PATTERN = '/^(5|05).[0-9]{7,8}$/';
+    public const PHONE_REGEX_MESSAGE = 'This value should be a mobile phone.';
+
     public const TYPES = [
         self::TYPE_ORDER,
     ];
